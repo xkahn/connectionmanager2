@@ -362,7 +362,8 @@ function init(extensionMeta) {
     extensionPath = extensionMeta.path;
     
     let theme = St.IconTheme.new();
-    theme.append_search_path(extensionPath);
+    if (theme)
+        theme.append_search_path(extensionPath);
 
 }
 
