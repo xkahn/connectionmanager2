@@ -39,11 +39,7 @@ import * as PopupMenu from 'resource:///org/gnome/shell/ui/popupMenu.js';
 import * as Panel from 'resource:///org/gnome/shell/ui/panel.js';
 import * as Util from 'resource:///org/gnome/shell/misc/util.js';
 
-/*
-  "ByteArray" does not appear to have an import in Gnome Shell 45 yet
-  Or I'm missing it as I hack and slash through this.
-  const ByteArray = imports.byteArray;
-*/
+let ByteArrayReplacement = new TextDecoder('utf-8');
 
 import {Extension, gettext as _} from 'resource:///org/gnome/shell/extensions/extension.js';
 let extensionPath;
@@ -127,7 +123,7 @@ const ConnectionManager = new Lang.Class({
         if (GLib.file_test(this._configFile, GLib.FileTest.EXISTS) ) {
 
             let filedata = GLib.file_get_contents(this._configFile);
-            let jsondata = JSON.parse(ByteArray.toString(filedata[1]));
+            let jsondata = JSON.parse(ByteArrayReplacement.decode(filedata[1]));
             let root = jsondata['Root'];
 
             // Global Settings
@@ -369,7 +365,7 @@ function disable() {
 function init(extensionMeta) {
     extensionPath = extensionMeta.path;
     
-    let theme = imports.gi.Gtk.IconTheme.get_default();
+    let theme = St.IconTheme.new();
     theme.append_search_path(extensionPath);
 
 }
