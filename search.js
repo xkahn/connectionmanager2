@@ -16,15 +16,36 @@
 //   License along with this library; if not, write to the Free Software
 //   Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA  02111-1307  USA
 
-const St = imports.gi.St;
-const Gio = imports.gi.Gio;
+import St from 'gi://St';
+import Gio from 'gi://Gio';
 
-const Shell = imports.gi.Shell;
-const Util = imports.misc.util;
-const Lang = imports.lang;
+import Shell from 'gi://Shell';
+import * as Util from 'resource:///org/gnome/shell/misc/util.js';
+
+// const Lang = imports.lang;
+import {Extension, gettext as _} from 'resource:///org/gnome/shell/extensions/extension.js';
+let Me = Extension.lookupByURL(import.meta.url);
+
+/*
+  "Lang" is no longer available. Just removing it for now.
+  When the replacement code goes in, I'll remove this comment.
+  const Lang = imports.lang;
+*/
+
 const Me = imports.misc.extensionUtils.getCurrentExtension();
 
-const Config = imports.misc.config;
+/*
+  The code above should be the replacement for these two lines.
+  Keeping these in a comment for now. (See extension.js)
+  const Me = imports.misc.extensionUtils.getCurrentExtension();
+*/
+
+import * as Config from 'resource:///org/gnome/shell/misc/config.js';
+/*
+  The above line should replace this one.
+  But there are now TWO config paths. I chose one, but I'm not sure I made the right choice.
+  const Config = imports.misc.config;
+*/
 
 // SSH / Apps Search Provider
 var SshSearchProvider = new Lang.Class({

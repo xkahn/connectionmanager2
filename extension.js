@@ -17,34 +17,51 @@
 //   Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA  02111-1307  USA
 
 
-const St = imports.gi.St;
-const Gdk = imports.gi.Gdk;
-const GLib = imports.gi.GLib;
-const Gio = imports.gi.Gio;
-const Lang = imports.lang;
-const Shell = imports.gi.Shell;
+import St from 'gi://St';
+import Gdk from 'gi://Gdk';
+import GLib from 'gi://GLib';
+import Gio from 'gi://Gio';
+import GObject from 'gi://GObject';
+import Shell from 'gi://Shell';
 
-const Mainloop = imports.mainloop;
-const Signals = imports.signals;
+/*
+  "Lang" is no longer available. Just removing it for now.
+  When the replacement code goes in, I'll remove this comment.
+  const Lang = imports.lang;
+*/
+  
 
-const Main = imports.ui.main;
-const PanelMenu = imports.ui.panelMenu;
-const PopupMenu = imports.ui.popupMenu;
-const Panel = imports.ui.panel;
-const Util = imports.misc.util;
-const ByteArray = imports.byteArray;
-const Me = imports.misc.extensionUtils.getCurrentExtension();
+import * as Signals from 'resource:///org/gnome/shell/misc/signals.js';
 
-const Gettext = imports.gettext.domain('gnome-shell-extensions');
-const _ = Gettext.gettext;
+import * as Main from 'resource:///org/gnome/shell/ui/main.js';
+import * as PanelMenu from 'resource:///org/gnome/shell/ui/panelMenu.js';
+import * as PopupMenu from 'resource:///org/gnome/shell/ui/popupMenu.js';
+import * as Panel from 'resource:///org/gnome/shell/ui/panel.js';
+import * as Util from 'resource:///org/gnome/shell/misc/util.js';
 
+/*
+  "ByteArray" does not appear to have an import in Gnome Shell 45 yet
+  Or I'm missing it as I hack and slash through this.
+  const ByteArray = imports.byteArray;
+*/
+
+import {Extension, gettext as _} from 'resource:///org/gnome/shell/extensions/extension.js';
 let extensionPath;
+let extensionObject, extensionSettings;
+let CM = Extension.lookupByURL(import.meta.url);
+let Me = Extension.lookupByURL(import.meta.url);
+
+/*
+  The code above should be the replacement for these two lines.
+  But I'm suspicious about why "CM" and "Me" need to be defined
+  and if the structure is still the same. Keeping these in a comment for now.
+  const Me = imports.misc.extensionUtils.getCurrentExtension();
+  const CM = imports.misc.extensionUtils.getCurrentExtension();
+*/
 
 // Import Command Terminal Manager and Search class
-const CM = imports.misc.extensionUtils.getCurrentExtension();
-const Search = CM.imports.search;
-const Terminals = CM.imports.terminals;
-
+import * as Search from './search.js'
+import * as Terminals from './terminals.js';
 
 const ConnectionManager = new Lang.Class({
     Name: 'ConnectionManager',
