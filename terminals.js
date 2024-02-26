@@ -25,7 +25,7 @@ const TERMINALS = new Array(
 // ******************************************************
 // Base Command Class
 // ******************************************************
-function TerminalCommand(terminal) {
+export function TerminalCommand(terminal) {
 
     switch (terminal) {
         case 0:

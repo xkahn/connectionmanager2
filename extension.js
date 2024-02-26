@@ -59,51 +59,31 @@ let Me = Extension.lookupByURL(import.meta.url);
 import * as Search from './search.js'
 import * as Terminals from './terminals.js';
 
-const ConnectionManager = new GObject.registerClass({
-    GTypeName: 'ConnectionManager',
- }, class ConnectionManager extends PanelMenu.Button {
+class ConnectionManager extends PanelMenu.Button {
+    static {
+        GObject.registerClass(this);
+    }
 
-    _init() {
+    constructor() {
 
-        super._init(1.0, "Connection Manager", false);
+        super(1.0, "Connection Manager", false);
+        this.CM = Extension.lookupByURL(import.meta.url);
 
         this._box = new St.BoxLayout();
-        
-//        this._icon = new St.Icon({
-//            style_class: 'system-status-icon'
-//        });
-//        this._icon.gicon = Gio.icon_new_for_string(Me.path + '/icons/' + DisabledIcon +'.svg');
-        
-        
 
-        this._icon = new St.Icon({ gicon: Gio.icon_new_for_string(Me.path + '/emblem-cm-symbolic.svg'),
+        this._icon = new St.Icon({ gicon: Gio.icon_new_for_string(this.CM.path + '/emblem-cm-symbolic.svg'),
                                              icon_size: 15 });
 
         this._bin = new St.Bin({child: this._icon});
 
         this._box.add(this._bin);
-        this.actor.add_actor(this._box);
-        this.actor.add_style_class_name('panel-status-button');
+        this.add_actor(this._box);
+        this.add_style_class_name('panel-status-button');
 
-        let CMPrefs = CM.metadata;
+        let CMPrefs = this.CM.metadata;
 
         this._configFile = GLib.build_filenamev([GLib.get_home_dir(), CMPrefs['sw_config']]);
         this._prefFile = GLib.build_filenamev([extensionPath, CMPrefs['sw_bin']]) + " " + extensionPath;
-
-        // Search provider
-        this._searchProvider = null;
-        this._sshList = [];
-        this._searchProvider = new Search.SshSearchProvider('CONNECTION MANAGER');
-
-        if( typeof Main.overview.viewSelector === "object" &&
-            typeof Main.overview.viewSelector._searchResults === "object") {
-            if(typeof Main.overview.viewSelector._searchResults._registerProvider === "function") { //3.14
-                Main.overview.viewSelector._searchResults._registerProvider(this._searchProvider);
-            } else if(typeof Main.overview.viewSelector._searchResults._searchSystem === "object" &&
-                      typeof Main.overview.viewSelector._searchResults._searchSystem.addProvider === "function") { //3.12
-                Main.overview.viewSelector._searchResults._searchSystem.addProvider(this._searchProvider);
-            }
-        }
 
         this._readConf();
     }
@@ -156,7 +136,7 @@ const ConnectionManager = new GObject.registerClass({
         this.menu.addMenuItem(menuPref, this.menu.length+1);
 
         // Update ssh name list
-        this._searchProvider._update(this._sshList);        
+        // this._searchProvider._update(this._sshList);        
     }
 
 
@@ -181,10 +161,10 @@ const ConnectionManager = new GObject.registerClass({
                     
                     icon = new St.Icon({icon_name: 'terminal',
                             style_class: 'connmgr-icon' });
-                    menuItem.actor.add_child(icon);
+                    menuItem.add_child(icon);
                     
                     label = new St.Label({ text: ident+child.Name });
-                    menuItem.actor.add_child(label);
+                    menuItem.add_child(label);
 
                     // For each command ...
                     this.TermCmd.resetEnv();
@@ -223,10 +203,10 @@ const ConnectionManager = new GObject.registerClass({
                     menuItem = new PopupMenu.PopupBaseMenuItem();
                     icon = new St.Icon({icon_name: 'gtk-execute',
                             style_class: 'connmgr-icon' });
-                    menuItem.actor.add_child(icon);
+                    menuItem.add_child(icon);
 
                     label = new St.Label({ text: ident+child.Name });
-                    menuItem.actor.add_child(label);
+                    menuItem.add_child(label);
 
                     // For each command ...
                     this.TermCmd.resetEnv();
@@ -285,10 +265,10 @@ const ConnectionManager = new GObject.registerClass({
                 menuItemAll = new PopupMenu.PopupBaseMenuItem();
                 iconAll = new St.Icon({icon_name: 'fileopen',
                                 style_class: 'connmgr-icon' });
-                menuItemAll.actor.add_child(iconAll);
+                menuItemAll.add_child(iconAll);
 
                 label = new St.Label({ text: ident+"Open all windows" });
-                menuItemAll.actor.add_child(label);
+                menuItemAll.add_child(label);
                 
                 parent.menu.addMenuItem(menuItemAll, position);
                 position += 1;
@@ -303,10 +283,10 @@ const ConnectionManager = new GObject.registerClass({
                 menuItemTabs = new PopupMenu.PopupBaseMenuItem();
                 iconTabs = new St.Icon({icon_name: 'fileopen',
                                 style_class: 'connmgr-icon' });
-                menuItemTabs.actor.add_child(iconTabs);
+                menuItemTabs.add_child(iconTabs);
 
                 label = new St.Label({ text: ident+"Open all as tabs" });
-                menuItemTabs.actor.add_child(label);
+                menuItemTabs.add_child(label);
 
                 parent.menu.addMenuItem(menuItemTabs, position);
                 position += 1;
@@ -332,38 +312,52 @@ const ConnectionManager = new GObject.registerClass({
         ident = ident_prec;
     }
 
-});
+}
 
 
 let cm;
 
-function enable() {
-    cm = new ConnectionManager();
+export default class ConnectionManagerExtension extends Extension {
     
-    let _children_length = Main.panel._rightBox.get_n_children();
-    Main.panel.addToStatusArea("connectionmanager", cm, _children_length - 2, "right");
-    
-    let file = Gio.file_new_for_path(cm._configFile);
-    cm.monitor = file.monitor(Gio.FileMonitorFlags.NONE, null);
-    cm.monitor.connect('changed', () => cm._readConf());
-}
+    enable() {
+        
+        // extensionPath = extensionMeta.path;
+        extensionObject = Extension.lookupByUUID('connectionmanager2@ciancio.net');
+        // extensionSettings = extensionObject.getSettings();
+        extensionPath = extensionObject.path;
+        
+        let theme = St.IconTheme.new();
+        //if (theme)
+        //    theme.append_search_path(extensionPath);
 
-function disable() {
-    if(cm._searchProvider!=null) {
-        Main.overview.removeSearchProvider(cm._searchProvider);
-        cm._searchProvider = null;
+        this.cm = new ConnectionManager();
+        
+        let _children_length = Main.panel._rightBox.get_n_children();
+        Main.panel.addToStatusArea("connectionmanager", this.cm, _children_length - 2, "right");
+        
+        let file = Gio.file_new_for_path(this.cm._configFile);
+        this.cm.monitor = file.monitor(Gio.FileMonitorFlags.NONE, null);
+        this.cm.monitor.connect('changed', () => this.cm._readConf());
+
+        this._searchProvider = new Search.SearchProvider(this);
+        Main.overview.searchController.addProvider(this._searchProvider);
     }
 
-    cm.monitor.cancel();
-    cm.destroy();
+    disable() {
+        Main.overview.searchController.removeProvider(this._searchProvider);
+        this._searchProvider = null;
+
+        this.cm.monitor.cancel();
+        this.cm.destroy();
+    }
+/*
+    constructor(extensionMeta) {
+        extensionPath = extensionMeta.path;
+        
+        let theme = St.IconTheme.new();
+        if (theme)
+            theme.append_search_path(extensionPath);
+
+    }
+*/
 }
-
-function init(extensionMeta) {
-    extensionPath = extensionMeta.path;
-    
-    let theme = St.IconTheme.new();
-    if (theme)
-        theme.append_search_path(extensionPath);
-
-}
-
