@@ -122,7 +122,7 @@ class ConnectionManager extends PanelMenu.Button {
             this._readTree(root, this, "");
 
         } else {
-            global.logError("CONNMGR: Error reading config file " + this._configFile);
+            console.error("CONNMGR: Error reading config file " + this._configFile);
             let filedata = null
         }
 
