@@ -76,8 +76,8 @@ class ConnectionManager extends PanelMenu.Button {
 
         this._bin = new St.Bin({child: this._icon});
 
-        this._box.add(this._bin);
-        this.add_actor(this._box);
+        this._box.actor.add_child(this._bin);
+        this.actor.add_child(this._box);
         this.add_style_class_name('panel-status-button');
 
         let CMPrefs = this.CM.metadata;
